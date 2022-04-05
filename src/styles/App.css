@@ -24,3 +24,23 @@
 .post__btn button {
   padding: 5px;
 }
+
+.item-enter {
+  transform: translateX(-350px);
+}
+
+.item-enter-active {
+  transform: translateX(0px);
+  transition: transform 500ms ease-in;
+}
+
+.item-exit {
+  opacity: 1;
+  transform: translateX(0px);
+}
+
+.item-exit-active {
+  transform: translateX(-350px);
+  opacity: 0.5;
+  transition: all 500ms ease-in;
+}
