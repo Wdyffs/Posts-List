@@ -2,8 +2,11 @@ import React from "react";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 import PostItem from "./PostItem";
 
-const PostsList = ({ posts, remove }) => {
-  if (posts.length === 0) {
+const PostsList = ({ error, posts, remove }) => {
+  if (error) {
+    return <></>;
+  }
+  if (!posts.length) {
     return <h1 style={{ textAlign: "center" }}>Posts list is empty</h1>;
   }
   return (
