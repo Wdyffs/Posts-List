@@ -10,6 +10,8 @@ import Loader from "../components/UI/Loader/Loader";
 import { useFetching } from "../hooks/useFetching";
 import { getPagesCount } from "../utils/pages";
 import Pagination from "../components/UI/Pagination/Pagination";
+import { useObserver } from "../hooks/useObserver";
+import MySelect from "../components/UI/select/MySelect";
 
 function Posts() {
   const [posts, setPosts] = useState([]);
@@ -21,16 +23,22 @@ function Posts() {
   const [filter, setFilter] = useState({ sort: "", searchQuery: "" });
   const [modal, setModal] = useState(false);
 
+  const lastElement = React.useRef();
+
   const [fetchPosts, isPostsLoading, postError] = useFetching(async () => {
     const response = await PostService.getAll(limit, currentPage);
-    setPosts(response.data);
+    setPosts([...posts, ...response.data]);
     const totalCount = response.headers["x-total-count"];
     setTotalPages(getPagesCount(totalCount, limit));
   });
 
+  useObserver(lastElement, currentPage < totalPages, isPostsLoading, () => {
+    setCurrentPage(currentPage + 1);
+  });
+
   useEffect(() => {
-    fetchPosts();
-  }, [currentPage]);
+    fetchPosts(limit, currentPage);
+  }, [currentPage, limit]);
 
   const sortedAndSearchedPost = usePosts(
     posts,
@@ -44,7 +52,7 @@ function Posts() {
   };
 
   function changeCurrentPage(page) {
-    setCurrentPage(page);
+    // setCurrentPage(page);
   }
 
   const removePost = (post) => {
@@ -61,6 +69,17 @@ function Posts() {
       </MyModal>
       <hr style={{ margin: "15px 0" }} />
       <PostFilter filter={filter} setFilter={setFilter} />
+      <MySelect
+        value={limit}
+        onChange={(value) => setLimit(value)}
+        defaultValue="Count of elements"
+        options={[
+          { value: 5, name: "5" },
+          { value: 10, name: "10" },
+          { value: 25, name: "25" },
+          { value: -1, name: "Show all posts" },
+        ]}
+      />
       {postError && (
         <h1
           style={{ fontStyle: "bold", textAlign: "center", marginTop: "30px" }}
@@ -68,7 +87,7 @@ function Posts() {
           Find an error <span style={{ color: "red" }}>${postError}</span>
         </h1>
       )}
-      {isPostsLoading ? (
+      {isPostsLoading && (
         <div
           style={{
             display: "flex",
@@ -78,13 +97,16 @@ function Posts() {
         >
           <Loader />
         </div>
-      ) : (
-        <PostsList
-          error={postError}
-          remove={removePost}
-          posts={sortedAndSearchedPost}
-        />
       )}
+      <PostsList
+        error={postError}
+        remove={removePost}
+        posts={sortedAndSearchedPost}
+      />
+      <div
+        ref={lastElement}
+        style={{ height: "20px", background: "teal" }}
+      ></div>
       <Pagination
         totalPages={totalPages}
         currentPage={currentPage}
