@@ -107,11 +107,11 @@ function Posts() {
         ref={lastElement}
         style={{ height: "20px", background: "teal" }}
       ></div>
-      <Pagination
+      {/* <Pagination
         totalPages={totalPages}
         currentPage={currentPage}
         changeCurrentPage={changeCurrentPage}
-      />
+      /> */}
     </div>
   );
 }
